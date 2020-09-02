@@ -9,6 +9,11 @@ import (
 	"strings"
 )
 
+// Version . . .
+const (
+	Version = "2020-08-27"
+)
+
 // Customer  . .
 type Customer struct {
 	ID string `json:"id"`
@@ -29,6 +34,8 @@ func (c *Client) Customer(token string) (*Customer, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	request.Header.Set("Stripe-Version", Version)
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	request.SetBasicAuth(c.Key, "")
 
@@ -88,5 +95,18 @@ There we do the folowing :
 13.	Finally return & reference of cutomer variable a,d nil
 
 Note: Read up on step 12
+
+*/
+
+/*Three
+Note that stripe endpoints have specific versions usually in a date format
+Stripe would automatically assign a version of thier API once they get a request with you secret key.
+The only way to change this to send a request to strip
+
+1. The objective of this iteration is to ensure that we are locked into a specific version
+	of the stripe API regardless of changes  to the secret keys we may provide.
+
+2. We achieve this by indivating the version in our request header of the Clinet method. This "Stripe-Version" parameter is
+	passed a global variable (const) declared outsite the Customer method
 
 */
