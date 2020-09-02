@@ -2,7 +2,6 @@ package stripeclient
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -16,7 +15,9 @@ const (
 
 // Customer  . .
 type Customer struct {
-	ID string `json:"id"`
+	ID            string `json:"id"`
+	Email         string `json:"email"`
+	DefaultSource string `json:"default_source"`
 }
 
 // Client . . .
@@ -25,10 +26,11 @@ type Client struct {
 }
 
 // Customer . . .
-func (c *Client) Customer(token string) (*Customer, error) {
+func (c *Client) Customer(token, email string) (*Customer, error) {
 	endpoint := "https://api.stripe.com/v1/customers"
 	v := url.Values{}
 	v.Set("source", token)
+	v.Set("email", email)
 
 	request, err := http.NewRequest(http.MethodPost, endpoint, strings.NewReader(v.Encode()))
 	if err != nil {
@@ -52,7 +54,7 @@ func (c *Client) Customer(token string) (*Customer, error) {
 		return nil, err
 	}
 
-	fmt.Println(string(callBody))
+	//fmt.Println(string(callBody))
 
 	var cus Customer
 	err = json.Unmarshal(callBody, &cus)
@@ -102,11 +104,22 @@ Note: Read up on step 12
 Note that stripe endpoints have specific versions usually in a date format
 Stripe would automatically assign a version of thier API once they get a request with you secret key.
 The only way to change this to send a request to strip
-
 1. The objective of this iteration is to ensure that we are locked into a specific version
 	of the stripe API regardless of changes  to the secret keys we may provide.
-
 2. We achieve this by indivating the version in our request header of the Clinet method. This "Stripe-Version" parameter is
 	passed a global variable (const) declared outsite the Customer method
+
+*/
+
+/*Iteration Five
+
+Here we are going to try to improve our Customer data struct
+1.	Add "Email" field to the Customer and also an email string argument to the Customet method
+2.	We also add the email value pair  to our url.Values object
+3. 	We add a field to the Cutomer struct to represent the paying customers credit card. This is represented as
+	"default_source": "card_1HMri2FODwZN8jDTTKhP1BC9", the json response we get fro the stripe API.
+
+4. Further implimetation in test file
+
 
 */

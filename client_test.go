@@ -32,7 +32,8 @@ func TestClient_Customer(t *testing.T) {
 	c := stripeclient.Client{Key: apiKey}
 
 	tok := "tok_amex"
-	cus, err := c.Customer(tok)
+	email := "glogussee@gmail.com"
+	cus, err := c.Customer(tok, email)
 	if err != nil {
 		t.Errorf("Customer() err = %v; Wants %v", err, nil)
 	}
@@ -43,6 +44,16 @@ func TestClient_Customer(t *testing.T) {
 
 	if !strings.HasPrefix(cus.ID, "cus_") {
 		t.Errorf("Customer() ID = %v; Wants prefix %q", cus.ID, "cus_")
+	}
+
+	// check card format validity (Not actually validataed card but just the format)
+	if !strings.HasPrefix(cus.DefaultSource, "card_") {
+		t.Errorf("Customer() DefaultStore= %v; Wants prefix %q", cus.DefaultSource, "card_")
+	}
+
+	// Check email
+	if cus.Email != email {
+		t.Errorf("Customer() Email= %v; Wants %q", cus.Email, email)
 	}
 
 }
@@ -80,5 +91,18 @@ Note: I inroduced the init() function to load my enviromant variable using the g
 Note that to accomplish step 4 we have to pass the secret key as an argument to the test commns
 IE :go test -v -key=sk_mysecretblablahblah
 
+
+*/
+
+/*Iteration Five
+Here we are going to try to improve our Customer data struct
+1.	Add "Email" field to the Customer and also an email string argument to the Customet method
+2.	We also add the email value pair  to our url.Values object
+3. 	We add a field to the Cutomer struct to represent the paying customers credit card. This is represented as
+	"default_source": "card_1HMri2FODwZN8jDTTKhP1BC9", the json response we get fro the stripe API.
+4.	Further implimetation in test file
+5.	Now that we habe introduced the Email and DefautSource to the Cutomer struct and the same is required
+	as parameters of the Customer method we have to expect then in the client test also.
+6. 	Add validation check (if block) for the email and datasource fileds
 
 */
