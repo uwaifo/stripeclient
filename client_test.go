@@ -58,6 +58,43 @@ func TestClient_Customer(t *testing.T) {
 
 }
 
+func TestClient_Charge(t *testing.T) {
+	//API Key validation section
+	if apiKey == "" {
+		t.Skip("No API key provided")
+	}
+
+	c := stripeclient.Client{Key: apiKey}
+
+	//Create a test customer to be charged
+	tok := "tok_amex"
+	email := "glogussee@gmail.com"
+	cus, err := c.Customer(tok, email)
+	if err != nil {
+		t.Errorf("Customer() err = %v; Wants nil", err)
+	}
+	//
+
+	//Test Parameters
+	_ = cus
+	amount := 8800
+	charge, err := c.Charge("cus_ID", amount)
+
+	if err != nil {
+		t.Errorf("Customer() err = %v; Wants %v", err, nil)
+	}
+
+	if charge == nil {
+		t.Fatal("Charge() = nil; wants non-nil value")
+	}
+
+	// Check amount
+	if charge.Amount != amount {
+		t.Errorf("Charge() Amount= %d; Wants %d", charge.Amount, amount)
+	}
+
+}
+
 /* Iterations One
 
 Here we create a standard test function with the testing package
@@ -104,5 +141,12 @@ Here we are going to try to improve our Customer data struct
 5.	Now that we habe introduced the Email and DefautSource to the Cutomer struct and the same is required
 	as parameters of the Customer method we have to expect then in the client test also.
 6. 	Add validation check (if block) for the email and datasource fileds
+
+*/
+
+/*Iteration Six
+Create the TestClient_Charge function . Similar to TestClient_Customer.
+1. Note the usage of "_ = cus" to prevent go from complaining about not using the Customer cus object while we test witch some dummy data.
+
 
 */

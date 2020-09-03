@@ -2,15 +2,18 @@ package stripeclient
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
 // Version . . .
 const (
-	Version = "2020-08-27"
+	Version         = "2020-08-27"
+	DefaultCurrency = "usd"
 )
 
 // Customer  . .
@@ -18,6 +21,16 @@ type Customer struct {
 	ID            string `json:"id"`
 	Email         string `json:"email"`
 	DefaultSource string `json:"default_source"`
+}
+
+// Charge  . . .
+type Charge struct {
+	ID             string `json:"id"`
+	Amount         int    `json:"amount"`
+	FailureCode    string `json:"failure_code"`
+	FailureMessage string `json:"failure_message"`
+	Paid           bool   `json:"paid"`
+	Status         string `json:"status"`
 }
 
 // Client . . .
@@ -53,15 +66,51 @@ func (c *Client) Customer(token, email string) (*Customer, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	//fmt.Println(string(callBody))
-
 	var cus Customer
 	err = json.Unmarshal(callBody, &cus)
 	if err != nil {
 		return nil, err
 	}
 	return &cus, nil
+
+}
+
+// Charge . . .
+func (c *Client) Charge(customerID string, chargeAmount int) (*Charge, error) {
+	endpoint := "https://api.stripe.com/v1/charges"
+	v := url.Values{}
+	v.Set("customer", customerID)
+	v.Set("amount", strconv.Itoa(chargeAmount))
+
+	request, err := http.NewRequest(http.MethodPost, endpoint, strings.NewReader(v.Encode()))
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Set("Stripe-Version", Version)
+	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	request.SetBasicAuth(c.Key, "")
+
+	httpClient := http.Client{}
+	response, err := httpClient.Do(request)
+	if err != nil {
+		return nil, err
+	}
+
+	defer response.Body.Close()
+
+	callBody, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(string(callBody))
+	var chrg Charge
+	err = json.Unmarshal(callBody, &chrg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &chrg, nil
 
 }
 
@@ -120,6 +169,12 @@ Here we are going to try to improve our Customer data struct
 	"default_source": "card_1HMri2FODwZN8jDTTKhP1BC9", the json response we get fro the stripe API.
 
 4. Further implimetation in test file
+*/
 
+/*Iteration Six
+Here we attempt to impliment /create the charge endpoint
+1.  We begin by creating the Charge struct with the related fields
+2.	We create a Charge method for the Charge struct.This method is prety much similar to the earlier created Customer method with diffrences in the reciever, arguement parameters etc.
+3. Take  note to stringify the response body to see possible nested error.
 
 */
